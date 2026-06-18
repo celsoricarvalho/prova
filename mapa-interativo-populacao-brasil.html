@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Mapa Interativo da População Brasileira</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#F1E6CC;
+    --parchment-deep:#E6D6AC;
+    --ink:#23332F;
+    --ink-soft:#56635D;
+    --card:#FBF6EA;
+    --gold:#C9962F;
+    --gold-deep:#A6771D;
+    --gold-soft:#F5E9CE;
+    --terracotta:#BD5B38;
+    --terracotta-soft:#E9D2C6;
+    --jade:#2F6F62;
+    --jade-soft:#D3E3DD;
+    --neutral-ink:#6B4A2F;
+    --neutral-soft:#E3D9C8;
+    --shadow:0 10px 28px rgba(35,51,47,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    min-height:100vh;
+    font-family:'Baloo 2', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(201,150,47,0.10), transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(47,111,98,0.10), transparent 40%),
+      var(--parchment);
+    background-attachment:fixed;
+    display:flex;
+    justify-content:center;
+    padding:22px 16px 44px;
+  }
+
+  .stage{ width:100%; max-width:480px; }
+
+  h1{
+    font-family:'Cinzel', serif;
+    font-size:1.3rem;
+    text-align:center;
+    margin:0 0 4px;
+    line-height:1.35;
+  }
+  .sub{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.9rem;
+    margin:0 0 18px;
+  }
+
+  .map-card{
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(35,51,47,0.08);
+    padding:18px 16px 14px;
+    margin-bottom:14px;
+  }
+
+  .map-wrap{
+    width:100%;
+    max-width:340px;
+    margin:0 auto;
+  }
+  svg{ width:100%; height:auto; display:block; }
+
+  .region{
+    stroke:#23332F;
+    stroke-width:2;
+    stroke-linejoin:round;
+    cursor:pointer;
+    transition:filter 0.15s, transform 0.15s, stroke-width 0.15s;
+    transform-origin:center;
+  }
+  .region:hover{ filter:brightness(1.08); }
+  .region.selected{
+    stroke:#FFFFFF;
+    stroke-width:4;
+    filter:brightness(1.1);
+  }
+
+  .map-hint{
+    text-align:center;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:8px;
+  }
+
+  /* chip buttons (alternative tap targets) */
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin-top:14px;
+  }
+  .chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 12px;
+    border-radius:999px;
+    border:2px solid transparent;
+    font-size:0.82rem;
+    font-weight:700;
+    color:#fff;
+    cursor:pointer;
+  }
+  .chip .dot{
+    width:10px; height:10px; border-radius:50%;
+    background:rgba(255,255,255,0.85);
+  }
+  .chip.active{ border-color:var(--ink); }
+
+  /* info panel */
+  .info-card{
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(35,51,47,0.08);
+    padding:22px 20px;
+    min-height:120px;
+  }
+  .info-placeholder{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    padding:16px 6px;
+    line-height:1.5;
+  }
+  .info-placeholder .big{ font-size:2rem; margin-bottom:6px; }
+
+  .info-header{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:12px;
+  }
+  .info-icon{
+    font-size:1.8rem;
+    width:46px; height:46px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .info-title{
+    font-family:'Cinzel', serif;
+    font-size:1.15rem;
+    font-weight:700;
+    color:var(--ink);
+  }
+
+  .density-row{
+    margin-bottom:14px;
+  }
+  .density-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+    font-weight:700;
+  }
+  .density-track{
+    height:9px;
+    border-radius:8px;
+    background:var(--parchment-deep);
+    overflow:hidden;
+  }
+  .density-fill{
+    height:100%;
+    border-radius:8px;
+    transition:width 0.5s ease;
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 13px;
+    border-radius:999px;
+    font-size:0.76rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.3px;
+    margin-bottom:12px;
+  }
+
+  .desc-text{
+    font-size:0.95rem;
+    line-height:1.55;
+    color:var(--ink);
+    margin-bottom:12px;
+  }
+
+  .curio-box{
+    background:var(--parchment-deep);
+    border-radius:12px;
+    padding:11px 13px;
+    font-size:0.85rem;
+    line-height:1.5;
+    color:var(--ink);
+  }
+  .curio-box b{ color:var(--gold-deep); }
+
+  .legend-note{
+    text-align:center;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:14px;
+    line-height:1.5;
+    padding:0 8px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <h1>🗺️ Mapa da População Brasileira</h1>
+  <p class="sub">Toque em uma região para descobrir se ela é área de atração, repulsão ou vazio demográfico</p>
+
+  <div class="map-card">
+    <div class="map-wrap">
+      <svg viewBox="0 0 600 660" xmlns="http://www.w3.org/2000/svg">
+        <path class="region" id="r-norte" fill="#3F6B4A"
+          d="M60,30 L340,30 L420,90 L380,210 L300,300 L180,280 L110,260 L40,230 L50,140 Z"
+          onclick="selectRegion('norte')"/>
+        <path class="region" id="r-nordeste" fill="#BD5B38"
+          d="M420,90 L520,170 L560,230 L490,380 L430,330 L300,300 L380,210 Z"
+          onclick="selectRegion('nordeste')"/>
+        <path class="region" id="r-centro" fill="#C9962F"
+          d="M110,260 L180,280 L300,300 L430,330 L340,420 L290,470 L150,360 Z"
+          onclick="selectRegion('centro')"/>
+        <path class="region" id="r-sudeste" fill="#4A5B8C"
+          d="M430,330 L490,380 L470,420 L430,480 L380,520 L290,470 L340,420 Z"
+          onclick="selectRegion('sudeste')"/>
+        <path class="region" id="r-sul" fill="#2F6F62"
+          d="M380,520 L350,560 L300,640 L220,560 L170,460 L150,360 L290,470 Z"
+          onclick="selectRegion('sul')"/>
+
+        <text x="207" y="160" font-family="Baloo 2, sans-serif" font-size="20" font-weight="700" fill="#fff" text-anchor="middle" style="pointer-events:none;">NORTE</text>
+        <text x="450" y="225" font-family="Baloo 2, sans-serif" font-size="16" font-weight="700" fill="#fff" text-anchor="middle" style="pointer-events:none;">NORDESTE</text>
+        <text x="248" y="350" font-family="Baloo 2, sans-serif" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" style="pointer-events:none;">CENTRO-OESTE</text>
+        <text x="400" y="425" font-family="Baloo 2, sans-serif" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" style="pointer-events:none;">SUDESTE</text>
+        <text x="262" y="505" font-family="Baloo 2, sans-serif" font-size="16" font-weight="700" fill="#fff" text-anchor="middle" style="pointer-events:none;">SUL</text>
+      </svg>
+    </div>
+    <p class="map-hint">Mapa esquemático simplificado (fora de escala exata)</p>
+
+    <div class="chip-row" id="chipRow"></div>
+  </div>
+
+  <div class="info-card" id="infoCard">
+    <div class="info-placeholder">
+      <div class="big">🧭</div>
+      Clique em uma região do mapa (ou em um dos botões acima) pra começar a explorar!
+    </div>
+  </div>
+
+  <p class="legend-note">Lembre-se: dentro de cada região existem variações — até em áreas de atração há lugares mais vazios, e em áreas de baixa densidade existem cidades grandes. Aqui vemos a <b>tendência geral</b> de cada região.</p>
+
+</div>
+
+<script>
+const REGIONS = {
+  norte: {
+    name: 'Norte',
+    icon: '🌳',
+    color: '#3F6B4A',
+    densityPct: 12,
+    densityLabel: 'Muito baixa',
+    badgeText: 'Vazio demográfico',
+    badgeBg: '#E3D9C8',
+    badgeColor: '#6B4A2F',
+    desc: 'É a maior região em território, mas uma das menos povoadas do Brasil. A densa Floresta Amazônica torna a ocupação humana mais difícil em grandes áreas, criando vastos vazios demográficos.',
+    curio: '<b>Curiosidade:</b> mesmo sendo enorme em tamanho, o Norte concentra uma pequena parte da população brasileira.'
+  },
+  nordeste: {
+    name: 'Nordeste',
+    icon: '🌵',
+    color: '#BD5B38',
+    densityPct: 45,
+    densityLabel: 'Moderada, desigual',
+    badgeText: 'Histórico de repulsão populacional',
+    badgeBg: '#E9D2C6',
+    badgeColor: '#BD5B38',
+    desc: 'O litoral é bem povoado, mas o sertão (interior semiárido) sofre com secas e poucas oportunidades. Por isso, historicamente, essa área "empurrou" muita gente para outras regiões em busca de trabalho.',
+    curio: '<b>Curiosidade:</b> no século 20, milhões de nordestinos migraram para o Sudeste em busca de emprego nas fábricas e nas cidades grandes.'
+  },
+  centro: {
+    name: 'Centro-Oeste',
+    icon: '🌾',
+    color: '#C9962F',
+    densityPct: 28,
+    densityLabel: 'Baixa, crescendo',
+    badgeText: 'Área de atração (crescimento recente)',
+    badgeBg: '#F5E9CE',
+    badgeColor: '#A6771D',
+    desc: 'Ainda tem baixa densidade, mas vem atraindo cada vez mais gente por causa do agronegócio — plantação de soja, milho e criação de gado em grande escala.',
+    curio: '<b>Curiosidade:</b> abriga Brasília, a capital do Brasil, uma cidade planejada e construída do zero, inaugurada em 1960.'
+  },
+  sudeste: {
+    name: 'Sudeste',
+    icon: '🏙️',
+    color: '#4A5B8C',
+    densityPct: 95,
+    densityLabel: 'A mais alta do país',
+    badgeText: 'Área de atração populacional',
+    badgeBg: '#D3E3DD',
+    badgeColor: '#2F6F62',
+    desc: 'É a principal área de atração populacional do Brasil: concentra grande parte dos empregos, indústrias e serviços do país, o que atrai pessoas de todas as regiões.',
+    curio: '<b>Curiosidade:</b> ocupa menos de 11% do território nacional, mas reúne a maior parte da população brasileira.'
+  },
+  sul: {
+    name: 'Sul',
+    icon: '🐄',
+    color: '#2F6F62',
+    densityPct: 78,
+    densityLabel: 'Alta',
+    badgeText: 'Área de atração populacional',
+    badgeBg: '#D3E3DD',
+    badgeColor: '#2F6F62',
+    desc: 'Tem densidade alta e bem distribuída, com boa qualidade de vida e forte presença da indústria e da agricultura — características de uma área de atração.',
+    curio: '<b>Curiosidade:</b> recebeu forte imigração europeia (italiana, alemã, polonesa, entre outras), o que marcou bastante a cultura da região.'
+  }
+};
+
+function buildChips(){
+  const row = document.getElementById('chipRow');
+  row.innerHTML = '';
+  Object.keys(REGIONS).forEach(key => {
+    const r = REGIONS[key];
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.id = 'chip-' + key;
+    btn.style.background = r.color;
+    btn.innerHTML = `<span class="dot"></span>${r.icon} ${r.name}`;
+    btn.onclick = () => selectRegion(key);
+    row.appendChild(btn);
+  });
+}
+
+function selectRegion(key){
+  const r = REGIONS[key];
+
+  document.querySelectorAll('.region').forEach(el => el.classList.remove('selected'));
+  document.getElementById('r-' + key).classList.add('selected');
+
+  document.querySelectorAll('.chip').forEach(el => el.classList.remove('active'));
+  document.getElementById('chip-' + key).classList.add('active');
+
+  const card = document.getElementById('infoCard');
+  card.innerHTML = `
+    <div class="info-header">
+      <div class="info-icon" style="background:${r.color}1A;">${r.icon}</div>
+      <div class="info-title">${r.name}</div>
+    </div>
+    <div class="density-row">
+      <div class="density-label"><span>Densidade populacional (ilustrativa)</span><span>${r.densityLabel}</span></div>
+      <div class="density-track"><div class="density-fill" style="width:${r.densityPct}%; background:${r.color};"></div></div>
+    </div>
+    <div class="badge" style="background:${r.badgeBg}; color:${r.badgeColor};">${r.badgeText}</div>
+    <div class="desc-text">${r.desc}</div>
+    <div class="curio-box">${r.curio}</div>
+  `;
+}
+
+buildChips();
+</script>
+</body>
+</html>
