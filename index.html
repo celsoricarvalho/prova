@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Kit de Estudos — História e Geografia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#F1E6CC;
+    --parchment-deep:#E6D6AC;
+    --ink:#23332F;
+    --ink-soft:#56635D;
+    --card:#FBF6EA;
+    --gold:#C9962F;
+    --gold-deep:#A6771D;
+    --terracotta:#BD5B38;
+    --terracotta-soft:#E9D2C6;
+    --jade:#2F6F62;
+    --jade-soft:#D3E3DD;
+    --indigo:#4A5B8C;
+    --indigo-soft:#D9DEEC;
+    --shadow:0 10px 28px rgba(35,51,47,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    min-height:100vh;
+    font-family:'Baloo 2', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(201,150,47,0.10), transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(47,111,98,0.10), transparent 40%),
+      var(--parchment);
+    background-attachment:fixed;
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 48px;
+  }
+
+  .stage{ width:100%; max-width:520px; }
+
+  .emblem{
+    font-size:40px;
+    text-align:center;
+    margin-bottom:6px;
+    letter-spacing:6px;
+  }
+  h1{
+    font-family:'Cinzel', serif;
+    font-size:1.55rem;
+    text-align:center;
+    margin:0 0 6px;
+    line-height:1.35;
+  }
+  .sub{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    margin:0 0 26px;
+    line-height:1.5;
+  }
+
+  .card-link{
+    display:block;
+    text-decoration:none;
+    color:inherit;
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(35,51,47,0.08);
+    padding:18px 18px;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    transition:transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .card-link:hover{
+    transform:translateY(-2px);
+    box-shadow:0 14px 32px rgba(35,51,47,0.22);
+  }
+  .card-link:active{ transform:translateY(0px); }
+
+  .icon-circle{
+    flex:0 0 auto;
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.7rem;
+  }
+
+  .card-text{ flex:1; }
+  .card-title{
+    font-family:'Cinzel', serif;
+    font-size:1.08rem;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:3px;
+  }
+  .card-desc{
+    font-size:0.86rem;
+    color:var(--ink-soft);
+    line-height:1.4;
+  }
+  .card-arrow{
+    flex:0 0 auto;
+    font-size:1.3rem;
+    color:var(--ink-soft);
+  }
+
+  .legend-row{
+    display:flex;
+    gap:10px;
+    margin:22px 0 6px;
+  }
+  .legend-pill{
+    flex:1;
+    text-align:center;
+    padding:9px 10px;
+    border-radius:12px;
+    font-size:0.78rem;
+    font-weight:700;
+  }
+  .legend-pill.hist{ background:var(--terracotta-soft); color:var(--terracotta); }
+  .legend-pill.geo{ background:var(--jade-soft); color:var(--jade); }
+
+  .footer-note{
+    text-align:center;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    margin-top:24px;
+    line-height:1.5;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="emblem">🏛️ 🧭</div>
+  <h1>Kit de Estudos<br>História &amp; Geografia</h1>
+  <p class="sub">Escolha uma atividade pra revisar pra prova</p>
+
+  <a class="card-link" href="expedicao-do-conhecimento.html">
+    <div class="icon-circle" style="background:var(--gold);">🗺️</div>
+    <div class="card-text">
+      <div class="card-title">Expedição do Conhecimento</div>
+      <div class="card-desc">Quiz com 18 perguntas misturando religiões antigas e população do Brasil</div>
+    </div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <a class="card-link" href="ficharo-revisao-rapida.html">
+    <div class="icon-circle" style="background:var(--terracotta);">🗂️</div>
+    <div class="card-text">
+      <div class="card-title">Fichário de Revisão</div>
+      <div class="card-desc">Flashcards pra revisão rápida — vire o cartão e marque o que já sabe</div>
+    </div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <a class="card-link" href="mapa-interativo-populacao-brasil.html">
+    <div class="icon-circle" style="background:var(--jade);">🧭</div>
+    <div class="card-text">
+      <div class="card-title">Mapa da População Brasileira</div>
+      <div class="card-desc">Toque nas regiões do Brasil e descubra atração, repulsão e vazios demográficos</div>
+    </div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <div class="legend-row">
+    <div class="legend-pill hist">🏛️ História</div>
+    <div class="legend-pill geo">🧭 Geografia</div>
+  </div>
+
+  <p class="footer-note">Bons estudos! Revise com calma, um tópico por vez.</p>
+
+</div>
+</body>
+</html>
