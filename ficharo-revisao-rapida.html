@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Fichário de Revisão — Expedição do Conhecimento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#F1E6CC;
+    --parchment-deep:#E6D6AC;
+    --ink:#23332F;
+    --ink-soft:#56635D;
+    --card:#FBF6EA;
+    --gold:#C9962F;
+    --gold-deep:#A6771D;
+    --terracotta:#BD5B38;
+    --terracotta-soft:#E9D2C6;
+    --jade:#2F6F62;
+    --jade-soft:#D3E3DD;
+    --good:#3C8253;
+    --good-soft:#DCEEE1;
+    --bad-soft:#F4DCD8;
+    --bad-ink:#8C3A30;
+    --shadow:0 10px 28px rgba(35,51,47,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    min-height:100vh;
+    font-family:'Baloo 2', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(201,150,47,0.10), transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(47,111,98,0.10), transparent 40%),
+      var(--parchment);
+    background-attachment:fixed;
+    display:flex;
+    justify-content:center;
+    padding:22px 16px 44px;
+  }
+
+  .stage{ width:100%; max-width:480px; }
+
+  h1{
+    font-family:'Cinzel', serif;
+    font-size:1.35rem;
+    text-align:center;
+    margin:0 0 4px;
+  }
+  .sub{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.9rem;
+    margin:0 0 18px;
+  }
+
+  /* filter chips */
+  .filters{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .chip{
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:0.82rem;
+    font-weight:700;
+    border:2px solid var(--parchment-deep);
+    background:#fff;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .chip.active.all{ background:var(--gold); border-color:var(--gold-deep); color:#fff; }
+  .chip.active.hist{ background:var(--terracotta); border-color:var(--terracotta); color:#fff; }
+  .chip.active.geo{ background:var(--jade); border-color:var(--jade); color:#fff; }
+
+  .meta-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+    padding:0 4px;
+  }
+  .meta-row b{ color:var(--ink); }
+  .known-pill{
+    background:var(--good-soft);
+    color:#2C5B3D;
+    padding:4px 10px;
+    border-radius:999px;
+    font-weight:800;
+    font-size:0.8rem;
+  }
+
+  /* card stack visual: faint cards behind */
+  .stack-wrap{
+    position:relative;
+    height:300px;
+    margin-bottom:18px;
+  }
+  .stack-deco{
+    position:absolute;
+    inset:0;
+    border-radius:18px;
+    background:var(--card);
+    border:1px solid rgba(35,51,47,0.08);
+  }
+  .stack-deco.d1{ transform:rotate(-3deg) translateY(6px); opacity:0.55; }
+  .stack-deco.d2{ transform:rotate(3deg) translateY(4px); opacity:0.75; }
+
+  .card-flip{
+    position:absolute;
+    inset:0;
+    perspective:1200px;
+    cursor:pointer;
+  }
+  .card-inner{
+    position:relative;
+    width:100%;
+    height:100%;
+    transition:transform 0.5s cubic-bezier(.2,.8,.2,1);
+    transform-style:preserve-3d;
+  }
+  .card-inner.flipped{ transform:rotateY(180deg); }
+
+  .face{
+    position:absolute;
+    inset:0;
+    border-radius:18px;
+    backface-visibility:hidden;
+    box-shadow:var(--shadow);
+    padding:26px 24px;
+    display:flex;
+    flex-direction:column;
+  }
+  .face-front{
+    background:var(--card);
+    border-top:6px solid var(--terracotta);
+  }
+  .face-front.geo{ border-top-color:var(--jade); }
+  .face-back{
+    background:var(--card);
+    transform:rotateY(180deg);
+    border-top:6px solid var(--gold);
+  }
+
+  .badge{
+    display:inline-flex;
+    align-self:flex-start;
+    align-items:center;
+    gap:6px;
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:0.72rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin-bottom:auto;
+  }
+  .badge.hist{ background:var(--terracotta-soft); color:var(--terracotta); }
+  .badge.geo{ background:var(--jade-soft); color:var(--jade); }
+
+  .face-center{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  .term{
+    font-family:'Cinzel', serif;
+    font-size:1.5rem;
+    font-weight:700;
+    color:var(--ink);
+    line-height:1.3;
+  }
+  .definition{
+    font-size:1.02rem;
+    line-height:1.5;
+    color:var(--ink);
+    text-align:center;
+  }
+  .hint{
+    text-align:center;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:auto;
+  }
+
+  .know-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .know-btn{
+    flex:1;
+    padding:13px;
+    border-radius:13px;
+    font-weight:800;
+    font-size:0.92rem;
+    border:none;
+    cursor:pointer;
+    color:#fff;
+  }
+  .know-btn.review{ background:linear-gradient(135deg, var(--terracotta) 0%, #9A4429 100%); }
+  .know-btn.know{ background:linear-gradient(135deg, var(--good) 0%, #285C3A 100%); }
+  .know-row{ display:none; }
+  .know-row.show{ display:flex; }
+
+  .nav-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .nav-btn{
+    padding:13px 16px;
+    border-radius:13px;
+    border:2px solid var(--parchment-deep);
+    background:#fff;
+    font-weight:700;
+    font-size:0.92rem;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .nav-btn.wide{ flex:1; text-align:center; }
+  .nav-btn:active{ transform:translateY(1px); }
+  .nav-btn:disabled{ opacity:0.4; cursor:default; }
+
+  .toggle-hard{
+    width:100%;
+    margin-top:12px;
+    padding:12px;
+    border-radius:13px;
+    border:2px dashed var(--gold);
+    background:transparent;
+    color:var(--gold-deep);
+    font-weight:800;
+    font-size:0.88rem;
+    cursor:pointer;
+  }
+  .toggle-hard.active{
+    background:var(--gold);
+    color:#fff;
+    border-style:solid;
+  }
+
+  .done-msg{
+    text-align:center;
+    padding:30px 10px;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    line-height:1.5;
+  }
+  .done-msg .big{
+    font-size:2rem;
+    margin-bottom:8px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <h1>🗂️ Fichário de Revisão</h1>
+  <p class="sub">Toque no cartão para ver a resposta</p>
+
+  <div class="filters">
+    <button class="chip active all" data-filter="all" onclick="setFilter('all')">Todos</button>
+    <button class="chip hist" data-filter="hist" onclick="setFilter('hist')">🏛️ História</button>
+    <button class="chip geo" data-filter="geo" onclick="setFilter('geo')">🧭 Geografia</button>
+  </div>
+
+  <button class="toggle-hard" id="hardToggle" onclick="toggleHardMode()">⭐ Revisar só os difíceis (0)</button>
+
+  <div class="meta-row" style="margin-top:14px;">
+    <span id="counter">Cartão 1 de 18</span>
+    <span class="known-pill" id="knownPill">✅ 0 dominados</span>
+  </div>
+
+  <div class="stack-wrap" id="stackWrap">
+    <div class="stack-deco d1"></div>
+    <div class="stack-deco d2"></div>
+    <div class="card-flip" id="cardFlip" onclick="flipCard()">
+      <div class="card-inner" id="cardInner">
+        <div class="face face-front" id="faceFront">
+          <span class="badge" id="frontBadge">🏛️ História</span>
+          <div class="face-center"><div class="term" id="frontTerm">Termo</div></div>
+          <div class="hint">toque para revelar</div>
+        </div>
+        <div class="face face-back">
+          <span class="badge" id="backBadge">🏛️ História</span>
+          <div class="face-center"><div class="definition" id="backDef">Definição</div></div>
+          <div class="hint">toque para voltar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="know-row" id="knowRow">
+    <button class="know-btn review" onclick="markCard(false)">😅 Preciso revisar</button>
+    <button class="know-btn know" onclick="markCard(true)">✅ Já sei</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="nav-btn" id="prevBtn" onclick="prevCard()">⟵ Anterior</button>
+    <button class="nav-btn wide" onclick="shuffleDeck()">🔀 Embaralhar</button>
+    <button class="nav-btn" id="nextBtn" onclick="nextCard()">Próxima ⟶</button>
+  </div>
+
+</div>
+
+<script>
+const CARDS = [
+  {cat:'hist', term:'Politeísmo', def:'Crença em vários deuses — comum entre egípcios, gregos e povos da Mesopotâmia.'},
+  {cat:'hist', term:'Monoteísmo', def:'Crença em um único Deus — característica do judaísmo, cristianismo e islamismo.'},
+  {cat:'hist', term:'Torá', def:'Livro sagrado do Judaísmo, revelado por Deus segundo a tradição judaica.'},
+  {cat:'hist', term:'Sinagoga', def:'Local onde os judeus se reúnem para orações e estudos.'},
+  {cat:'hist', term:'Moisés', def:'Principal profeta do Judaísmo.'},
+  {cat:'hist', term:'Bíblia', def:'Livro sagrado do Cristianismo.'},
+  {cat:'hist', term:'Igreja', def:'Local onde os cristãos realizam cultos e orações.'},
+  {cat:'hist', term:'Jesus Cristo', def:'Figura central do Cristianismo, religião com mais seguidores no mundo hoje.'},
+  {cat:'hist', term:'Alcorão', def:'Livro sagrado do Islamismo.'},
+  {cat:'hist', term:'Mesquita', def:'Local onde os muçulmanos realizam suas orações.'},
+  {cat:'hist', term:'Maomé', def:'Principal profeta do Islamismo.'},
+  {cat:'geo', term:'IBGE', def:'Instituto Brasileiro de Geografia e Estatística — coleta dados sobre a população do Brasil.'},
+  {cat:'geo', term:'Populoso, mas pouco povoado', def:'Característica do Brasil: muitos habitantes, mas como o território é enorme, a densidade é baixa.'},
+  {cat:'geo', term:'Vazios demográficos', def:'Áreas quase desabitadas, com poucos habitantes.'},
+  {cat:'geo', term:'Áreas de atração populacional', def:'Lugares que oferecem empregos e melhores condições de vida, atraindo pessoas.'},
+  {cat:'geo', term:'Áreas de repulsão populacional', def:'Lugares de onde as pessoas saem por falta de oportunidades.'},
+  {cat:'geo', term:'Migração', def:'Deslocamento de pessoas em busca de melhores condições de vida: emprego, moradia, estudo, saúde, segurança.'},
+  {cat:'geo', term:'País desenvolvido', def:'País que oferece boas condições de vida, considerando renda, educação e saúde.'}
+];
+
+let deck = CARDS.map((c, i) => ({...c, id:i, known:false}));
+let activeFilter = 'all';
+let hardMode = false;
+let viewIndices = [];
+let pos = 0;
+let flipped = false;
+
+function buildView(){
+  let pool = deck;
+  if(activeFilter !== 'all') pool = pool.filter(c => c.cat === activeFilter);
+  if(hardMode) pool = pool.filter(c => !c.known);
+  viewIndices = pool.map(c => c.id);
+  pos = 0;
+  flipped = false;
+  render();
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function shuffleDeck(){
+  viewIndices = shuffle(viewIndices);
+  pos = 0;
+  flipped = false;
+  render();
+}
+
+function setFilter(f){
+  activeFilter = f;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.chip[data-filter="${f}"]`).classList.add('active');
+  buildView();
+}
+
+function toggleHardMode(){
+  hardMode = !hardMode;
+  document.getElementById('hardToggle').classList.toggle('active', hardMode);
+  buildView();
+}
+
+function updateHardCount(){
+  const hardCount = deck.filter(c => !c.known).length;
+  document.getElementById('hardToggle').textContent = `⭐ Revisar só os difíceis (${hardCount})`;
+}
+
+function updateKnownPill(){
+  const knownCount = deck.filter(c => c.known).length;
+  document.getElementById('knownPill').textContent = `✅ ${knownCount} dominados`;
+}
+
+function render(){
+  updateHardCount();
+  updateKnownPill();
+
+  const stackWrap = document.getElementById('stackWrap');
+  const knowRow = document.getElementById('knowRow');
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  if(viewIndices.length === 0){
+    stackWrap.innerHTML = `<div class="done-msg"><div class="big">🎉</div>Nenhum cartão por aqui!<br>Troque o filtro ou desative "só difíceis".</div>`;
+    knowRow.classList.remove('show');
+    counter.textContent = '';
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    return;
+  }
+
+  // rebuild stack html if it was replaced by done-msg
+  if(!document.getElementById('cardFlip')){
+    stackWrap.innerHTML = `
+      <div class="stack-deco d1"></div>
+      <div class="stack-deco d2"></div>
+      <div class="card-flip" id="cardFlip" onclick="flipCard()">
+        <div class="card-inner" id="cardInner">
+          <div class="face face-front" id="faceFront">
+            <span class="badge" id="frontBadge">🏛️ História</span>
+            <div class="face-center"><div class="term" id="frontTerm">Termo</div></div>
+            <div class="hint">toque para revelar</div>
+          </div>
+          <div class="face face-back">
+            <span class="badge" id="backBadge">🏛️ História</span>
+            <div class="face-center"><div class="definition" id="backDef">Definição</div></div>
+            <div class="hint">toque para voltar</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  const card = deck[viewIndices[pos]];
+  const catLabel = card.cat === 'hist' ? '🏛️ História' : '🧭 Geografia';
+  const catClass = card.cat === 'hist' ? 'hist' : 'geo';
+
+  document.getElementById('frontBadge').className = 'badge ' + catClass;
+  document.getElementById('frontBadge').textContent = catLabel;
+  document.getElementById('backBadge').className = 'badge ' + catClass;
+  document.getElementById('backBadge').textContent = catLabel;
+  document.getElementById('faceFront').className = 'face face-front' + (card.cat === 'geo' ? ' geo' : '');
+  document.getElementById('frontTerm').textContent = card.term;
+  document.getElementById('backDef').textContent = card.def;
+  document.getElementById('cardInner').classList.remove('flipped');
+  flipped = false;
+  knowRow.classList.remove('show');
+
+  counter.textContent = `Cartão ${pos+1} de ${viewIndices.length}`;
+  prevBtn.disabled = (pos === 0);
+  nextBtn.disabled = false;
+}
+
+function flipCard(){
+  flipped = !flipped;
+  document.getElementById('cardInner').classList.toggle('flipped', flipped);
+  document.getElementById('knowRow').classList.toggle('show', flipped);
+}
+
+function markCard(isKnown){
+  const card = deck[viewIndices[pos]];
+  card.known = isKnown;
+  updateKnownPill();
+  updateHardCount();
+  setTimeout(() => {
+    if(pos < viewIndices.length - 1){
+      nextCard();
+    } else {
+      flipCard();
+    }
+  }, 150);
+}
+
+function nextCard(){
+  if(pos < viewIndices.length - 1){
+    pos++;
+    flipped = false;
+    render();
+  }
+}
+
+function prevCard(){
+  if(pos > 0){
+    pos--;
+    flipped = false;
+    render();
+  }
+}
+
+buildView();
+</script>
+</body>
+</html>

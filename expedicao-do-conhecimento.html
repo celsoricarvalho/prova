@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Expedição do Conhecimento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#F1E6CC;
+    --parchment-deep:#E6D6AC;
+    --ink:#23332F;
+    --ink-soft:#56635D;
+    --card:#FBF6EA;
+    --gold:#C9962F;
+    --gold-deep:#A6771D;
+    --terracotta:#BD5B38;
+    --terracotta-soft:#E9D2C6;
+    --jade:#2F6F62;
+    --jade-soft:#D3E3DD;
+    --good:#3C8253;
+    --good-soft:#DCEEE1;
+    --bad:#B14B3E;
+    --bad-soft:#F4DCD8;
+    --shadow: 0 10px 28px rgba(35,51,47,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    min-height:100vh;
+    font-family:'Baloo 2', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(201,150,47,0.10), transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(47,111,98,0.10), transparent 40%),
+      var(--parchment);
+    background-attachment:fixed;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:24px 16px 48px;
+  }
+
+  /* faint topographic-line texture */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:0.5;
+    background-image:
+      repeating-radial-gradient(circle at 20% 30%, rgba(35,51,47,0.035) 0, rgba(35,51,47,0.035) 1px, transparent 2px, transparent 38px),
+      repeating-radial-gradient(circle at 80% 70%, rgba(35,51,47,0.035) 0, rgba(35,51,47,0.035) 1px, transparent 2px, transparent 44px);
+  }
+
+  .stage{
+    width:100%;
+    max-width:520px;
+    position:relative;
+    z-index:1;
+  }
+
+  h1,h2,h3{
+    font-family:'Cinzel', serif;
+    margin:0;
+  }
+
+  .card{
+    background:var(--card);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(35,51,47,0.08);
+    padding:28px 24px;
+  }
+
+  /* ---------- START SCREEN ---------- */
+  #screen-start .emblem{
+    font-size:44px;
+    text-align:center;
+    margin-bottom:6px;
+    letter-spacing:6px;
+  }
+  #screen-start h1{
+    font-size:1.6rem;
+    text-align:center;
+    color:var(--ink);
+    line-height:1.3;
+  }
+  #screen-start .sub{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.98rem;
+    margin-top:10px;
+    line-height:1.5;
+  }
+  .map-divider{
+    height:2px;
+    margin:20px 0;
+    background:repeating-linear-gradient(90deg, var(--gold) 0 8px, transparent 8px 14px);
+    opacity:0.6;
+  }
+  label.field-label{
+    display:block;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    font-weight:600;
+  }
+  input#explorerName{
+    width:100%;
+    padding:12px 14px;
+    border-radius:12px;
+    border:2px solid var(--parchment-deep);
+    background:#fff;
+    font-family:'Baloo 2', sans-serif;
+    font-size:1rem;
+    color:var(--ink);
+    outline:none;
+  }
+  input#explorerName:focus{
+    border-color:var(--gold);
+  }
+
+  .legend-row{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  .legend-pill{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 12px;
+    border-radius:12px;
+    font-size:0.85rem;
+    font-weight:700;
+  }
+  .legend-pill.hist{ background:var(--terracotta-soft); color:var(--terracotta); }
+  .legend-pill.geo{ background:var(--jade-soft); color:var(--jade); }
+
+  button{
+    font-family:'Baloo 2', sans-serif;
+    cursor:pointer;
+    border:none;
+  }
+
+  .btn-primary{
+    width:100%;
+    margin-top:22px;
+    padding:15px 18px;
+    border-radius:14px;
+    font-size:1.05rem;
+    font-weight:800;
+    color:#fff;
+    background:linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+    box-shadow:0 6px 0 rgba(166,119,29,0.4), 0 10px 20px rgba(166,119,29,0.25);
+    transition:transform 0.08s ease;
+  }
+  .btn-primary:active{
+    transform:translateY(3px);
+    box-shadow:0 3px 0 rgba(166,119,29,0.4);
+  }
+
+  /* ---------- QUIZ SCREEN ---------- */
+  #screen-quiz{ display:none; }
+
+  .trail-wrap{
+    margin-bottom:18px;
+  }
+  .trail-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:8px;
+  }
+  .trail-top .step{
+    font-family:'Cinzel', serif;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    letter-spacing:0.5px;
+  }
+  .trail-top .score{
+    font-size:0.85rem;
+    font-weight:700;
+    color:var(--gold-deep);
+  }
+  .trail-track{
+    position:relative;
+    height:10px;
+    border-radius:8px;
+    background:var(--parchment-deep);
+    background-image:repeating-linear-gradient(90deg, rgba(35,51,47,0.18) 0 2px, transparent 2px 10px);
+    overflow:hidden;
+  }
+  .trail-fill{
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:0%;
+    border-radius:8px;
+    background:linear-gradient(90deg, var(--terracotta) 0%, var(--gold) 100%);
+    transition:width 0.4s ease;
+  }
+  .trail-marker{
+    position:absolute;
+    top:-11px;
+    transform:translateX(-50%);
+    font-size:1.3rem;
+    transition:left 0.4s ease;
+    left:0%;
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:0.78rem;
+    font-weight:800;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .badge.hist{ background:var(--terracotta-soft); color:var(--terracotta); }
+  .badge.geo{ background:var(--jade-soft); color:var(--jade); }
+
+  .question-text{
+    font-size:1.18rem;
+    line-height:1.45;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:20px;
+  }
+
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .option-btn{
+    text-align:left;
+    padding:14px 16px;
+    border-radius:13px;
+    border:2px solid var(--parchment-deep);
+    background:#fff;
+    font-size:0.98rem;
+    font-weight:600;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:background 0.15s, border-color 0.15s, transform 0.08s;
+  }
+  .option-btn .letter{
+    flex:0 0 auto;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    background:var(--parchment-deep);
+    color:var(--ink-soft);
+    font-size:0.8rem;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .option-btn:active{ transform:scale(0.99); }
+  .option-btn:not(:disabled):hover{
+    border-color:var(--gold);
+  }
+  .option-btn.correct{
+    background:var(--good-soft);
+    border-color:var(--good);
+    color:var(--good);
+  }
+  .option-btn.correct .letter{ background:var(--good); color:#fff; }
+  .option-btn.wrong{
+    background:var(--bad-soft);
+    border-color:var(--bad);
+    color:var(--bad);
+  }
+  .option-btn.wrong .letter{ background:var(--bad); color:#fff; }
+  .option-btn:disabled{ cursor:default; }
+  .option-btn.dim{ opacity:0.55; }
+
+  .feedback-box{
+    margin-top:16px;
+    padding:14px 16px;
+    border-radius:13px;
+    font-size:0.92rem;
+    line-height:1.5;
+    display:none;
+  }
+  .feedback-box.show{ display:block; }
+  .feedback-box.good{ background:var(--good-soft); color:#2C5B3D; }
+  .feedback-box.bad{ background:var(--bad-soft); color:#8C3A30; }
+  .feedback-box .ftitle{ font-weight:800; display:block; margin-bottom:3px; }
+
+  .btn-continue{
+    width:100%;
+    margin-top:16px;
+    padding:14px;
+    border-radius:13px;
+    font-size:1rem;
+    font-weight:800;
+    color:#fff;
+    background:linear-gradient(135deg, var(--jade) 0%, #234F45 100%);
+    box-shadow:0 6px 0 rgba(35,79,69,0.35);
+    display:none;
+  }
+  .btn-continue.show{ display:block; }
+  .btn-continue:active{ transform:translateY(2px); box-shadow:0 3px 0 rgba(35,79,69,0.35); }
+
+  /* ---------- END SCREEN ---------- */
+  #screen-end{ display:none; text-align:center; }
+  #screen-end .trophy{ font-size:56px; }
+  #screen-end .medal-title{
+    font-size:1.3rem;
+    margin-top:6px;
+  }
+  #screen-end .score-line{
+    margin-top:14px;
+    font-size:1rem;
+    color:var(--ink-soft);
+  }
+  #screen-end .score-line b{ color:var(--ink); font-size:1.3rem; }
+  #screen-end .praise{
+    margin-top:14px;
+    background:var(--parchment-deep);
+    border-radius:13px;
+    padding:14px 16px;
+    font-size:0.95rem;
+    line-height:1.55;
+    color:var(--ink);
+  }
+  #screen-end .review-title{
+    margin-top:24px;
+    text-align:left;
+    font-size:0.95rem;
+    font-weight:800;
+    color:var(--ink-soft);
+    border-top:2px dashed var(--parchment-deep);
+    padding-top:16px;
+  }
+  .review-item{
+    text-align:left;
+    margin-top:10px;
+    padding:10px 12px;
+    border-radius:11px;
+    font-size:0.86rem;
+    line-height:1.4;
+  }
+  .review-item.miss{ background:var(--bad-soft); color:#8C3A30; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- START SCREEN -->
+  <div id="screen-start" class="card">
+    <div class="emblem">🏛️ 🧭</div>
+    <h1>Expedição do<br>Conhecimento</h1>
+    <p class="sub">Uma jornada por templos antigos e pelo mapa do Brasil para treinar pra prova de História e Geografia.</p>
+
+    <div class="map-divider"></div>
+
+    <label class="field-label" for="explorerName">Nome do(a) explorador(a) (opcional)</label>
+    <input id="explorerName" type="text" placeholder="Digite seu nome">
+
+    <div class="legend-row">
+      <div class="legend-pill hist">🏛️ História</div>
+      <div class="legend-pill geo">🧭 Geografia</div>
+    </div>
+
+    <button class="btn-primary" onclick="startQuiz()">Iniciar expedição</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="screen-quiz" class="card">
+    <div class="trail-wrap">
+      <div class="trail-top">
+        <span class="step" id="stepLabel">Parada 1 de 18</span>
+        <span class="score" id="scoreLabel">⭐ 0</span>
+      </div>
+      <div class="trail-track">
+        <div class="trail-fill" id="trailFill"></div>
+        <div class="trail-marker" id="trailMarker">🧭</div>
+      </div>
+    </div>
+
+    <div id="categoryBadge" class="badge hist">🏛️ História</div>
+    <div class="question-text" id="questionText">Pergunta</div>
+
+    <div class="options" id="optionsWrap"></div>
+
+    <div class="feedback-box" id="feedbackBox">
+      <span class="ftitle" id="feedbackTitle"></span>
+      <span id="feedbackText"></span>
+    </div>
+
+    <button class="btn-continue" id="btnContinue" onclick="nextQuestion()">Continuar</button>
+  </div>
+
+  <!-- END SCREEN -->
+  <div id="screen-end" class="card">
+    <div class="trophy" id="trophyEmoji">🏆</div>
+    <h2 class="medal-title" id="medalTitle">Mestre Explorador!</h2>
+    <div class="score-line">Você acertou <b id="finalScore">0</b> de <b id="finalTotal">18</b></div>
+    <div class="praise" id="praiseText"></div>
+
+    <div id="reviewWrap"></div>
+
+    <button class="btn-primary" onclick="restartQuiz()">Jogar novamente</button>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {cat:'hist', q:'Egípcios, gregos e povos da Mesopotâmia, no geral, acreditavam em vários deuses. Como chamamos essa crença?',
+   options:['Politeísmo','Monoteísmo','Ateísmo','Animismo'], correct:'Politeísmo',
+   explain:'Politeísmo é a crença em vários deuses — comum entre egípcios, gregos e povos da Mesopotâmia.'},
+
+  {cat:'hist', q:'Qual é a religião monoteísta mais antiga da História?',
+   options:['Judaísmo','Cristianismo','Islamismo','Budismo'], correct:'Judaísmo',
+   explain:'O Judaísmo é a religião monoteísta mais antiga registrada na História.'},
+
+  {cat:'hist', q:'Qual é o livro sagrado do Judaísmo?',
+   options:['Torá','Bíblia','Alcorão','Talmude'], correct:'Torá',
+   explain:'A Torá é o livro sagrado do Judaísmo, revelada por Deus segundo a tradição judaica.'},
+
+  {cat:'hist', q:'Onde os judeus se reúnem para orações e estudos?',
+   options:['Sinagoga','Igreja','Mesquita','Templo grego'], correct:'Sinagoga',
+   explain:'A sinagoga é o local de oração e estudo no Judaísmo.'},
+
+  {cat:'hist', q:'Quem é o principal profeta do Judaísmo?',
+   options:['Moisés','Jesus Cristo','Maomé','Davi'], correct:'Moisés',
+   explain:'Moisés é considerado o principal profeta do Judaísmo.'},
+
+  {cat:'hist', q:'Qual religião é hoje a que tem mais seguidores no mundo?',
+   options:['Cristianismo','Judaísmo','Islamismo','Hinduísmo'], correct:'Cristianismo',
+   explain:'O Cristianismo é, atualmente, a religião com mais seguidores no mundo.'},
+
+  {cat:'hist', q:'Qual é o livro sagrado do Cristianismo?',
+   options:['Bíblia','Torá','Alcorão','Vedas'], correct:'Bíblia',
+   explain:'A Bíblia é o livro sagrado do Cristianismo.'},
+
+  {cat:'hist', q:'Onde os cristãos realizam seus cultos e orações?',
+   options:['Igreja','Sinagoga','Mesquita','Pirâmide'], correct:'Igreja',
+   explain:'As igrejas são os locais onde os cristãos se reúnem para cultos e orações.'},
+
+  {cat:'hist', q:'Quem é a figura central do Cristianismo?',
+   options:['Jesus Cristo','Moisés','Maomé','Buda'], correct:'Jesus Cristo',
+   explain:'Jesus Cristo é a figura central da fé cristã.'},
+
+  {cat:'hist', q:'Qual é o livro sagrado do Islamismo?',
+   options:['Alcorão','Torá','Bíblia','Talmude'], correct:'Alcorão',
+   explain:'O Alcorão é o livro sagrado do Islamismo.'},
+
+  {cat:'hist', q:'Onde os muçulmanos realizam suas orações?',
+   options:['Mesquita','Sinagoga','Igreja','Templo'], correct:'Mesquita',
+   explain:'As mesquitas são os locais de oração no Islamismo.'},
+
+  {cat:'hist', q:'Quem é o principal profeta do Islamismo?',
+   options:['Maomé','Moisés','Jesus Cristo','Abraão'], correct:'Maomé',
+   explain:'Maomé é o principal profeta do Islamismo.'},
+
+  {cat:'geo', q:'Qual instituto é responsável por coletar dados sobre a população do Brasil?',
+   options:['IBGE','INEP','IBAMA','INSS'], correct:'IBGE',
+   explain:'O IBGE (Instituto Brasileiro de Geografia e Estatística) coleta esses dados sobre a população.'},
+
+  {cat:'geo', q:'O Brasil tem muitos habitantes, mas um território enorme. Por isso, dizemos que o Brasil é...',
+   options:['Populoso, mas pouco povoado','Pouco populoso e muito povoado','Pequeno e muito povoado','Populoso e muito povoado'],
+   correct:'Populoso, mas pouco povoado',
+   explain:'O Brasil é populoso (muita gente), mas como o território é enorme, a distribuição (povoamento) é relativamente baixa.'},
+
+  {cat:'geo', q:'Como chamamos as áreas quase desabitadas, com poucos habitantes?',
+   options:['Vazios demográficos','Áreas de atração','Áreas de repulsão','Zonas urbanas'], correct:'Vazios demográficos',
+   explain:'Vazios demográficos são regiões com pouquíssimos habitantes.'},
+
+  {cat:'geo', q:'Lugares que oferecem empregos e melhores condições de vida, atraindo pessoas, são chamados de...',
+   options:['Áreas de atração populacional','Áreas de repulsão populacional','Vazios demográficos','Áreas rurais'],
+   correct:'Áreas de atração populacional',
+   explain:'Essas áreas atraem pessoas justamente por oferecerem mais oportunidades.'},
+
+  {cat:'geo', q:'Lugares de onde as pessoas saem por falta de oportunidades são chamados de...',
+   options:['Áreas de repulsão populacional','Áreas de atração populacional','Vazios demográficos','Zonas costeiras'],
+   correct:'Áreas de repulsão populacional',
+   explain:'Áreas de repulsão "empurram" as pessoas para outros lugares por falta de oportunidades.'},
+
+  {cat:'geo', q:'Quais são os três critérios principais para considerar um país desenvolvido?',
+   options:['Renda, educação e saúde','População, território e clima','Exportação, importação e moeda','Idioma, religião e cultura'],
+   correct:'Renda, educação e saúde',
+   explain:'Renda, educação e saúde são os indicadores usados para avaliar a qualidade de vida de um país.'}
+];
+
+let order = [];
+let current = 0;
+let score = 0;
+let answered = false;
+let misses = [];
+let explorerName = '';
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz(){
+  explorerName = document.getElementById('explorerName').value.trim();
+  order = shuffle(QUESTIONS).map(q => ({...q, shuffledOptions: shuffle(q.options)}));
+  current = 0;
+  score = 0;
+  misses = [];
+  document.getElementById('screen-start').style.display = 'none';
+  document.getElementById('screen-end').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered = false;
+  const item = order[current];
+  const total = order.length;
+
+  document.getElementById('stepLabel').textContent = `Parada ${current+1} de ${total}`;
+  document.getElementById('scoreLabel').textContent = `⭐ ${score}`;
+
+  const pct = (current / total) * 100;
+  document.getElementById('trailFill').style.width = pct + '%';
+  document.getElementById('trailMarker').style.left = pct + '%';
+
+  const badge = document.getElementById('categoryBadge');
+  if(item.cat === 'hist'){
+    badge.className = 'badge hist';
+    badge.textContent = '🏛️ História';
+  } else {
+    badge.className = 'badge geo';
+    badge.textContent = '🧭 Geografia';
+  }
+
+  document.getElementById('questionText').textContent = item.q;
+
+  const wrap = document.getElementById('optionsWrap');
+  wrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  item.shuffledOptions.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="letter">${letters[idx]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(opt, btn);
+    wrap.appendChild(btn);
+  });
+
+  document.getElementById('feedbackBox').className = 'feedback-box';
+  document.getElementById('btnContinue').className = 'btn-continue';
+}
+
+function selectAnswer(opt, btnEl){
+  if(answered) return;
+  answered = true;
+  const item = order[current];
+  const allBtns = document.querySelectorAll('.option-btn');
+  const isCorrect = opt === item.correct;
+
+  allBtns.forEach(b => {
+    b.disabled = true;
+    const optText = b.querySelector('span:last-child').textContent;
+    if(optText === item.correct){
+      b.classList.add('correct');
+    } else if(b === btnEl){
+      b.classList.add('wrong');
+    } else {
+      b.classList.add('dim');
+    }
+  });
+
+  const fb = document.getElementById('feedbackBox');
+  const ft = document.getElementById('feedbackTitle');
+  const fx = document.getElementById('feedbackText');
+
+  if(isCorrect){
+    score++;
+    fb.className = 'feedback-box show good';
+    ft.textContent = '✅ Acertou!';
+  } else {
+    misses.push(item);
+    fb.className = 'feedback-box show bad';
+    ft.textContent = '❌ Quase!';
+  }
+  fx.textContent = item.explain;
+
+  document.getElementById('scoreLabel').textContent = `⭐ ${score}`;
+  document.getElementById('btnContinue').classList.add('show');
+  document.getElementById('btnContinue').textContent = (current === order.length-1) ? 'Ver resultado' : 'Continuar';
+}
+
+function nextQuestion(){
+  current++;
+  if(current >= order.length){
+    showEnd();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showEnd(){
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-end').style.display = 'block';
+
+  const total = order.length;
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalTotal').textContent = total;
+
+  const pct = score / total;
+  const namePart = explorerName ? explorerName : 'explorador(a)';
+  let trophy, title, praise;
+
+  if(pct >= 0.9){
+    trophy = '🏆'; title = 'Ouro — Mestre Explorador(a)!';
+    praise = `Incrível, ${namePart}! Você domina os templos antigos e o mapa do Brasil. Pronto(a) pra prova!`;
+  } else if(pct >= 0.7){
+    trophy = '🥈'; title = 'Prata — Ótimo(a) Explorador(a)!';
+    praise = `Muito bem, ${namePart}! Você já conhece bem o caminho. Revise os pontos abaixo e a vitória é garantida.`;
+  } else if(pct >= 0.5){
+    trophy = '🥉'; title = 'Bronze — Bom começo!';
+    praise = `Bom trabalho, ${namePart}! Você já encontrou metade do tesouro. Vamos revisar juntos os pontos abaixo?`;
+  } else {
+    trophy = '🗺️'; title = 'A expedição continua!';
+    praise = `Toda expedição tem desafios, ${namePart}! Vamos rever esses pontos juntos e tentar de novo — você vai longe.`;
+  }
+
+  document.getElementById('trophyEmoji').textContent = trophy;
+  document.getElementById('medalTitle').textContent = title;
+  document.getElementById('praiseText').textContent = praise;
+
+  const reviewWrap = document.getElementById('reviewWrap');
+  reviewWrap.innerHTML = '';
+  if(misses.length > 0){
+    const h = document.createElement('div');
+    h.className = 'review-title';
+    h.textContent = '📜 Pontos para revisar:';
+    reviewWrap.appendChild(h);
+    misses.forEach(m => {
+      const d = document.createElement('div');
+      d.className = 'review-item miss';
+      d.innerHTML = `<b>${m.q}</b><br>Resposta certa: ${m.correct}`;
+      reviewWrap.appendChild(d);
+    });
+  }
+}
+
+function restartQuiz(){
+  document.getElementById('screen-end').style.display = 'none';
+  document.getElementById('screen-start').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
